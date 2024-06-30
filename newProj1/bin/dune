@@ -1,0 +1,6 @@
+(executable
+ (public_name newProj1)
+ (name main)
+ (libraries debug probs types)
+ (flags (:standard -warn-error -32-69-27 )))
+

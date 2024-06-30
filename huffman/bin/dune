@@ -1,0 +1,6 @@
+(executable
+ (public_name huffman)
+ (name main)
+ (libraries datastructs debugM)
+ (flags
+  (:standard -warn-error -32-69-27)))

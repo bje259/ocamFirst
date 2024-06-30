@@ -1,0 +1,3 @@
+(library
+ (name datastructs)
+ (libraries debugM))
