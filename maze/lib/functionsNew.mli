@@ -17,14 +17,18 @@ module Generator : sig
 end
 
 module MazePrinter : sig
-  val print_mazeNew :
-    ?solution_path:(int * int) list -> Types.maze -> unit
-
-  val print_maze2 :
-    ?solve:Types.solution_arg -> Types.maze -> unit
-
+  val print_mazeNew : ?solution_path:(int * int) list -> Types.maze -> unit
+  val print_maze2 : ?solve:Types.solution_arg -> Types.maze -> unit
   val print_smaze_list : Types.solved_maze list -> unit
+
+  val mazeList :
+    Types.solution_algo list ->
+    Types.mazeGen ->
+    int ->
+    int ->
+    int ->
+    Types.solved_maze list
+
   val string_of_cell : Types.cell -> string
   val string_of_maze : Types.maze -> string
 end
-

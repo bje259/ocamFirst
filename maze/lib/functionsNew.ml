@@ -17,6 +17,12 @@ module Solver = struct
     in
     aux (Array.length maze.grid - 2) 1
 
+  let find_start maze =
+    let rec aux y x =
+      match maze.grid.(y).(x) with Path -> (y, x) | Wall -> aux y (x + 1)
+    in
+    aux 0 1
+
   (* Check if a position is within the maze bounds *)
   let in_bounds maze (y, x) =
     x >= 0 && y >= 0
@@ -42,7 +48,8 @@ module Solver = struct
     pot_nxts
 
   let dfs_solve_new maze =
-    let start = (0, 1) in
+    (* let start = (0, 1) in *)
+    let start = find_start maze in
     let goal = find_end maze in
     let dfsfailed_attempts = ref 0 in
     let dfsattempts = ref 0 in
@@ -51,7 +58,8 @@ module Solver = struct
       match stack with
       | [] -> None
       | (y, x) :: rest ->
-          if (y, x) = goal then Some (List.rev ((y, x) :: visited))
+          if (y, x) = goal then
+            Some (List.rev ((y, x) :: visited))
           else if List.mem (y, x) visited then
             let () = incr dfsfailed_attempts in
             aux visited rest
@@ -64,40 +72,67 @@ module Solver = struct
             if new_moves = [] then
               let () = incr dfsfailed_attempts in
               aux visited rest
-            else aux ((y, x) :: visited) (new_moves @ rest)
+            else
+              aux ((y, x) :: visited) (new_moves @ rest)
     in
-    aux [] [ start ]
+    let result = aux [] [ start ] in
+    let () =
+      Printf.printf "DFS attempts: %d\n" !dfsattempts;
+      Printf.printf "DFS failed attempts: %d\n" !dfsfailed_attempts
+    in
+    result
 
   let bfs_solve_new maze =
-    let start = (0, 1) in
+    (* let start = (0, 1) in *)
+    let start = find_start maze in
     let goal = find_end maze in
     let queue = Queue.create () in
     let visited =
       Hashtbl.create (Array.length maze.grid * Array.length maze.grid.(0))
     in
+    let bfsfailed_attempts = ref 0 in
+    (* let bfsattempts = ref 0 in *)
     let rec bfs () =
-      if Queue.is_empty queue then None
+      if Queue.is_empty queue then
+        None
       else
         let path, (y, x) = Queue.take queue in
-        if (y, x) = goal then Some (List.rev ((y, x) :: path))
-        else if Hashtbl.mem visited (y, x) then bfs ()
+        if (y, x) = goal then
+          Some (List.rev ((y, x) :: path))
+        else if Hashtbl.mem visited (y, x) then
+          let () = incr bfsfailed_attempts in
+          bfs ()
         else (
           Hashtbl.add visited (y, x) true;
           List.iter
             (fun (dy, dx) ->
               let next_pos = (y + dy, x + dx) in
               if is_path maze next_pos && not (Hashtbl.mem visited next_pos)
-              then Queue.add ((y, x) :: path, next_pos) queue)
+              then
+                Queue.add ((y, x) :: path, next_pos) queue
+              else
+                incr bfsfailed_attempts)
             [ (-1, 0); (1, 0); (0, -1); (0, 1) ];
           bfs ())
     in
-    Queue.add ([], start) queue;
+    let () = Queue.add ([], start) queue in
     let result = bfs () in
+    let hashList = List.of_seq (Hashtbl.to_seq_keys visited) in
+    let bfsattempts = List.length hashList in
+    (* let () = *)
+    (*   DebugUtil.debug_print_list *)
+    (*     (DebugUtil.string_of_tuple string_of_int string_of_int) *)
+    (*     hashList *)
+    (* in *)
+    let () = Printf.printf "BFS attempts: %d\n" bfsattempts in
+    let () = Printf.printf "BFS failed attempts: %d\n" !bfsfailed_attempts in
     result
 end
 
 module Generator = struct
   open Maze
+
+  let () = Random.self_init ()
 
   let binary_tree_maze width height =
     let maze = init_maze width height in
@@ -108,7 +143,7 @@ module Generator = struct
         let cell_x = (2 * x) + 1 in
         (*Printf.printf "build room: (%d,%d)\n" cell_x cell_y;*)
         maze.grid.(cell_y).(cell_x) <- Path;
-        let carve_north = y > 0 && (x = width - 1 || Random.bool ()) in
+        let carve_north = y > 0 && (x = width - 1 || Random.int 10 < 4) in
         if carve_north then
           (*Printf.printf "carve_north: (%d,%d)\n" cell_x cell_y;*)
           maze.grid.(cell_y - 1).(cell_x) <- Path
@@ -135,8 +170,9 @@ module Generator = struct
         let cell_y = (2 * y) + 1 in
         let cell_x = (2 * x) + 1 in
         mazesw.grid.(cell_y).(cell_x) <- Path;
-        let carve_east = x < width - 1 && (y = 0 || Random.bool ()) in
-        if carve_east then mazesw.grid.(cell_y).(cell_x + 1) <- Path
+        let carve_east = x < width - 1 && (y = 0 || Random.int 10 < 7) in
+        if carve_east then
+          mazesw.grid.(cell_y).(cell_x + 1) <- Path
         else
           let run_end = !run_start + Random.int (x - !run_start + 1) in
           mazesw.grid.(cell_y - 1).((2 * run_end) + 1) <- Path;
@@ -149,8 +185,9 @@ module Generator = struct
       let eX = snd mzEnd in
       mazesw.grid.(eY).(eX) <- Path
     in
-    mazesw.grid.(0).(1) <- Path;
 
+    (* Remove the hard-coded start point *)
+    (* mazesw.grid.(0).(1) <- Path; *)
     let result = mazesw in
     result
 end
@@ -169,8 +206,10 @@ module MazePrinter = struct
             match cell with
             | Wall -> print_string wll
             | Path ->
-                if List.mem (y, x) solution_path then print_string solved
-                else print_string pth)
+                if List.mem (y, x) solution_path then
+                  print_string solved
+                else
+                  print_string pth)
           row;
         print_newline ())
       maze.grid
@@ -194,8 +233,10 @@ module MazePrinter = struct
             match cell with
             | Wall -> print_string wll
             | Path ->
-                if List.mem (y, x) solution_path then print_string solved
-                else print_string pth)
+                if List.mem (y, x) solution_path then
+                  print_string solved
+                else
+                  print_string pth)
           row;
         print_newline ())
       maze.grid
@@ -206,6 +247,32 @@ module MazePrinter = struct
         print_mazeNew ~solution_path:solution smaze;
         print_newline ())
       smaze_list
+
+  let mazeList (algoLst : solution_algo list) (genF : mazeGen) (n : int)
+      (w : int) (h : int) : solved_maze list =
+    let width, height = (w, h) in
+    let mazeQueue = Queue.create () in
+    let rec repeat = function
+      | 0 -> ()
+      | i ->
+          let maze = genF width height in
+          let rec solveMaze = function
+            | [] -> ()
+            | hd :: tl ->
+                let solvedResult = Option.value ~default:[] (hd maze) in
+                let solvedMaze = { smaze = maze; solution = solvedResult } in
+                let () = Queue.push solvedMaze mazeQueue in
+                solveMaze tl
+          in
+          let () =
+            Printf.printf "Maze %d\n" (n - i + 1);
+            solveMaze algoLst
+          in
+          repeat (i - 1)
+    in
+    repeat n;
+    let result = List.of_seq (Queue.to_seq mazeQueue) in
+    result
 
   let string_of_cell = function Wall -> "XX" | Path -> "  "
 

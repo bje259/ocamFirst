@@ -1,41 +1,35 @@
-open Lib.Types
+(* open Lib.Types *)
 open Lib.FunctionsNew
 
-let mazeList (algoLst : solution_algo list) (genF : mazeGen) (n : int) (w : int)
-    (h : int) : solved_maze list =
-  let width, height = (w, h) in
-  let mazeQueue = Queue.create () in
-  let rec repeat = function
-    | 0 -> ()
-    | i ->
-        let maze = genF width height in
-        let rec solveMaze = function
-          | [] -> ()
-          | hd :: tl ->
-              let solvedResult = Option.value ~default:[] (hd maze) in
-              let solvedMaze = { smaze = maze; solution = solvedResult } in
-              let () = Queue.push solvedMaze mazeQueue in
-              solveMaze tl
-        in
-        let () = solveMaze algoLst in
-        repeat (i - 1)
-  in
-  repeat n;
-  let result = List.of_seq (Queue.to_seq mazeQueue) in
-  result
+(* let mazeList (algoLst : solution_algo list) (genF : mazeGen) (n : int) (w : int) *)
+(*     (h : int) : solved_maze list = *)
+(*   let width, height = (w, h) in *)
+(*   let mazeQueue = Queue.create () in *)
+(*   let rec repeat = function *)
+(*     | 0 -> () *)
+(*     | i -> *)
+(*         let maze = genF width height in *)
+(*         let rec solveMaze = function *)
+(*           | [] -> () *)
+(*           | hd :: tl -> *)
+(*               let solvedResult = Option.value ~default:[] (hd maze) in *)
+(*               let solvedMaze = { smaze = maze; solution = solvedResult } in *)
+(*               let () = Queue.push solvedMaze mazeQueue in *)
+(*               solveMaze tl *)
+(*         in *)
+(*         let () = solveMaze algoLst in *)
+(*         repeat (i - 1) *)
+(*   in *)
+(*   repeat n; *)
+(*   let result = List.of_seq (Queue.to_seq mazeQueue) in *)
+(*   result *)
 
 let () =
+  let gen = Generator.sidewinder_maze2 in
   MazePrinter.print_smaze_list
-    (mazeList
+    (MazePrinter.mazeList
        [ Solver.dfs_solve_new; Solver.bfs_solve_new ]
-       Generator.binary_tree_maze 1 20 10)
-;;
-
-let testA = Generator.binary_tree_maze 30 10 in
-let solutionA = Solver.dfs_solve_new testA in
-MazePrinter.print_mazeNew
-  ~solution_path:(Option.value ~default:[] solutionA)
-  testA
+       gen 3 20 15)
 
 (*let printMazeList mazes = *)
 (**)

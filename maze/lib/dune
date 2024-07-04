@@ -1,6 +1,6 @@
 (library
  (name lib)
- (modules functions types debugUtil functionsNew)
+ (modules excelSolver functions types debugUtil functionsNew)
  (modules_without_implementation types)
  (flags
   (:standard -warn-error -A)))
