@@ -12,6 +12,9 @@ bug-reports: "https://github.com/username/reponame/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.16"}
+  "core"
+  "agrid"
+  "flex-array"
   "odoc" {with-doc}
 ]
 build: [

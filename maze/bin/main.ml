@@ -1,5 +1,8 @@
-(* open Lib.Types *)
+open Lib.Types
 open Lib.FunctionsNew
+open Lib.ExcelSolver2
+
+(* let () = esMain2 () *)
 
 (* let mazeList (algoLst : solution_algo list) (genF : mazeGen) (n : int) (w : int) *)
 (*     (h : int) : solved_maze list = *)
@@ -24,13 +27,14 @@ open Lib.FunctionsNew
 (*   let result = List.of_seq (Queue.to_seq mazeQueue) in *)
 (*   result *)
 
-let () =
-  let gen = Generator.sidewinder_maze2 in
-  MazePrinter.print_smaze_list
-    (MazePrinter.mazeList
-       [ Solver.dfs_solve_new; Solver.bfs_solve_new ]
-       gen 3 20 15)
+(* let () = *)
+(*   let gen = Generator.sidewinder_maze2 in *)
+(*   MazePrinter.print_smaze_list *)
+(*     (MazePrinter.mazeList *)
+(*        [ Solver.dfs_solve_new; Solver.bfs_solve_new ] *)
+(*        gen 3 30 15) *)
 
+(* let () = *)
 (*let printMazeList mazes = *)
 (**)
 (*    Printf.printf "Maze %d\n" i;*)

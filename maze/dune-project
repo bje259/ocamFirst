@@ -19,7 +19,7 @@
  (name maze)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml dune)
+ (depends ocaml dune core agrid flex-array)
  (tags
   (topics "to describe" your project)))
 

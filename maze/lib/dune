@@ -1,6 +1,15 @@
 (library
  (name lib)
- (modules excelSolver functions types debugUtil functionsNew)
+ (modules
+  excelSolver
+  functions
+  types
+  debugUtil
+  functionsNew
+  excelSolver
+  excelSolver2
+  vectorArith)
  (modules_without_implementation types)
+ (libraries agrid flex-array base)
  (flags
   (:standard -warn-error -A)))
