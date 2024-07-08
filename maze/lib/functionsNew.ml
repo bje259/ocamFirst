@@ -1,7 +1,6 @@
 open Types
 
 (*open Queue*)
-
 module Maze = struct
   let init_maze width height =
     let grid = Array.make_matrix ((2 * height) + 1) ((2 * width) + 1) Wall in
@@ -287,4 +286,7 @@ module MazePrinter = struct
       s := !s ^ "\n"
     done;
     !s
+
+  let pp_print_cell fmt cell =
+    Stdlib.Format.fprintf fmt "%s" (string_of_cell cell)
 end

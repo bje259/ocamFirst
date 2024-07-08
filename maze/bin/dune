@@ -2,5 +2,6 @@
  (public_name maze)
  (name main)
  (libraries lib utop core agrid flex-array)
+ (modes byte exe)
  (flags
   (:standard -warn-error -A)))

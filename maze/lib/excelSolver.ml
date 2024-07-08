@@ -81,14 +81,14 @@ let openWallsGrid =
         0)
     newgrid
 
-let esMain () =
-  Stdlib.print_endline "Hello, World!";
-  FunctionsNew.MazePrinter.print_mazeNew testmaze;
-  Stdlib.print_endline "Cell Type";
-  DebugUtil.ppGrid newgrid Stdlib.Format.pp_print_int;
-  Stdlib.print_endline "Walls";
-  DebugUtil.ppGrid wallsGrid Stdlib.Format.pp_print_int;
-  Stdlib.print_endline "Tiles";
-  DebugUtil.ppGrid tilesGrid Stdlib.Format.pp_print_int;
-  Stdlib.print_endline "Open Walls";
-  DebugUtil.ppGrid openWallsGrid Stdlib.Format.pp_print_int
+(* let esMain () = *)
+(*   Stdlib.print_endline "Hello, World!"; *)
+(*   FunctionsNew.MazePrinter.print_mazeNew testmaze; *)
+(*   Stdlib.print_endline "Cell Type"; *)
+(*   DebugUtil.ppGrid newgrid Stdlib.Format.pp_print_int; *)
+(*   Stdlib.print_endline "Walls"; *)
+(*   DebugUtil.ppGrid wallsGrid Stdlib.Format.pp_print_int; *)
+(*   Stdlib.print_endline "Tiles"; *)
+(*   DebugUtil.ppGrid tilesGrid Stdlib.Format.pp_print_int; *)
+(*   Stdlib.print_endline "Open Walls"; *)
+(*   DebugUtil.ppGrid openWallsGrid Stdlib.Format.pp_print_int *)

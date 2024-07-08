@@ -1,6 +1,6 @@
 (lang dune 3.16)
 
-(name maze)
+(name compilertest)
 
 (generate_opam_files true)
 
@@ -14,12 +14,12 @@
 (license LICENSE)
 
 (documentation https://url/to/documentation)
-(map_workspace_root false)
+
 (package
- (name maze)
+ (name compilertest)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml dune core agrid flex-array)
+ (depends ocaml dune)
  (tags
   (topics "to describe" your project)))
 

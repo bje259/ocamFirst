@@ -8,7 +8,8 @@
   functionsNew
   excelSolver
   excelSolver2
-  vectorArith)
+  vectorArith
+  temp)
  (modules_without_implementation types)
  (libraries agrid flex-array base)
  (flags

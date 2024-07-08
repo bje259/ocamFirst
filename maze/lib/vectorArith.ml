@@ -98,6 +98,6 @@ module GridMath = struct
             (fun acc x -> mathGrids FlexVector.add acc x)
             (Flex_array.get arr 0) (Flex_array.tail arr)
         in
-        let () = DebugUtil.ppGrid sumGrid Stdlib.Format.pp_print_int in
+        (* let () = DebugUtil.ppGrid sumGrid Stdlib.Format.pp_print_int in *)
         sumGrid
 end

@@ -2,7 +2,8 @@
  open Types 
  open Base 
  open Queue 
- open Agrid 
+ open Agrid
+open DebugUtil
 
 
  let checkCell (x : int) (y : int) (c : cell) = 
@@ -23,7 +24,23 @@
 
  let wallsGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0)) 
  let tilesGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0)) 
- let openWallsGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0)) 
+ let (openWallsGrid : int Agrid.t) = (Flex_array.make mHeight (Flex_array.make mWidth 0)) 
+
+ let printDebugTransforms ?(aryStd=[||]) ?(stringArray=[||]) ?(desc="") = 
+  let () = 
+ Stdlib.print_endline desc;
+ if (Array.length aryStd > 0) then printArrays2 ~f:(Function Int.to_string) aryStd;
+ if (Array.length stringArray > 0) then printArrays2 stringArray
+ in ()
+
+
+let intGridToStringArray ?(printOpt=false) ?(desc="") gIn =
+  let aryStd = gridToAry gIn in
+  let stringArray = int_to_string_array aryStd in
+let () = if printOpt then printDebugTransforms ~aryStd ~stringArray ~desc in
+     stringArray
+
+
 
  let incX x = 
    if x = mWidth - 1 then 
@@ -47,13 +64,13 @@
  }
 
  let calc1 parms s = 
-     let () = Stdlib.Printf.printf s parms.x parms.y in 
+     (* let () = Stdlib.Printf.printf s parms.x parms.y in  *)
      (Agrid.set parms.wallsGrid ~x:parms.x ~y:parms.y 1, parms.tilesGrid, parms.openWallsGrid, incX parms.x, incY parms.y parms.x)
  let calc2 parms s = 
-     let () = Stdlib.Printf.printf s parms.x parms.y in 
+     (* let () = Stdlib.Printf.printf s parms.x parms.y in  *)
      (parms.wallsGrid, Agrid.set parms.tilesGrid ~x:parms.x ~y:parms.y 1, parms.openWallsGrid, incX parms.x, incY parms.y parms.x)
  
- let wallsGrid,tilesGrid,openWallsGrid , _, _ = 
+ let wallsgrid,tilesgrid,openwallsgrid , _, _ = 
    (Agrid.fold (fun (wg, tg, owg, x, y) i -> 
        match checkCell x y i with 
      | 2 ->calc1 {wallsGrid = wg; tilesGrid = tg; openWallsGrid = owg; x = x; y = y} "Wall (%d, %d)\n"  
@@ -61,11 +78,11 @@
          calc2  {wallsGrid = wg; tilesGrid = tg; openWallsGrid = owg;x = x; y = y}  "Tile (%d, %d)\n"  
 
                  | 0 -> 
-           Stdlib.Printf.printf "Open Wall (%d, %d)\n" x y  
-           (wg, tg, owg ~x ~y 1, (if x = (mWidth - 1) then 0 else x + 1), incY y x) 
-       | _ -> (wg, tg, owg, (if x = (mWidth - 1) then 0 else x + 1), incY y x)) 
-     (wallsGrid, tilesGrid, openWallsGrid, 0, 0) 
-     (grid : int) 
+         (* let () = Stdlib.Printf.printf "Open Wall (%d, %d)\n" x y in   *)
+           (wg, tg, Agrid.set owg ~x ~y 1, incX x, incY y x) 
+       | _ -> (wg, tg, owg, incX x, incY y x)
+ ) 
+     (wallsGrid, tilesGrid, openWallsGrid, 0, 0) grid) 
 
  let emptyCol = Flex_array.make mHeight 0 
  let emptyRow = Flex_array.make mWidth 0 
@@ -87,7 +104,7 @@
 
  let dirTest x y = x land y = y 
 
- let letters = 
+ let letters grdAry = 
    Agrid.map 
      (fun x -> 
        match x with 
@@ -96,7 +113,7 @@
        | x when dirTest x 2 -> "W" 
        | x when dirTest x 1 -> "S" 
        | _ -> "X") 
-     combined 
+     grdAry 
 
  (* let esMain2 () =  *)
  (*   Stdlib.print_endline "Hello, World!";  *)
@@ -127,51 +144,75 @@
    | West -> DebugUtil.ppGrid leftOpenWalls Stdlib.Format.pp_print_int 
    | North -> DebugUtil.ppGrid northOpenWalls Stdlib.Format.pp_print_int 
    | East -> DebugUtil.ppGrid rightOpenWalls Stdlib.Format.pp_print_int 
-     | South -> DebugUtil.ppGrid southOpenWalls Stdlib.Format.pp_print_int; 
+     | South -> DebugUtil.ppGrid southOpenWalls Stdlib.Format.pp_print_int 
+
+ let dataGen () =
+ let maze = FunctionsNew.Generator.binary_tree_maze 10 5 in
+let grid = Agrid.of_array maze.grid in 
+let mWidth = Agrid.width grid  in
+   let mHeight = Agrid.height grid  in
+   let wallsGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0)) in
+   let tilesGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0)) in 
+   let openWallsGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0)) in 
+   
+ let calc1 parms s = 
+     let () = Stdlib.Printf.printf s parms.x parms.y in 
+     (Agrid.set parms.wallsGrid ~x:parms.x ~y:parms.y 1, parms.tilesGrid, parms.openWallsGrid, incX parms.x, incY parms.y parms.x) in
+ let calc2 parms s = 
+     let () = Stdlib.Printf.printf s parms.x parms.y in 
+     (parms.wallsGrid, Agrid.set parms.tilesGrid ~x:parms.x ~y:parms.y 1, parms.openWallsGrid, incX parms.x, incY parms.y parms.x) in
 
 
- let maze = FunctionsNew.Generator.binary_tree_maze 10 5  
+ let wallsgrid,tilesgrid,openwallsgrid , _, _ = 
+   (Agrid.fold (fun (wg, tg, owg, x, y) i -> 
+       match checkCell x y i with 
+     | 2 ->calc1 {wallsGrid = wg; tilesGrid = tg; openWallsGrid = owg; x = x; y = y} "Wall (%d, %d)\n"  
+       | 1 -> 
+         calc2  {wallsGrid = wg; tilesGrid = tg; openWallsGrid = owg;x = x; y = y}  "Tile (%d, %d)\n"  
 
- let grid = Agrid.of_array maze.grid  
-   let mWidth = Agrid.width grid  
-   let mHeight = Agrid.height grid  
-   let wallsGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0))  
-   let tilesGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0))  
-   let openWallsGrid = (Flex_array.make mHeight (Flex_array.make mWidth 0))  
-   let wallsGrid, tilesGrid, openWallsGrid, _, _ = 
-     Agrid.fold 
-       (fun (wg, tg, owg, x, y) i -> 
-         match checkCell x y i with 
-         | 2 -> 
-             let () = Stdlib.Printf.printf "Wall (%d, %d)\n" x y  
-             (Agrid.set wg ~x ~y 1, tg, owg, incX x, incY y x) 
-         | 1 -> 
-             let () = Stdlib.Printf.printf "Tile (%d, %d)\n" x y  
-             (wg, Agrid.set tg ~x ~y 1, owg, incX x, incY y x) 
-         | 0 -> 
-             let () = Stdlib.Printf.printf "Open Wall (%d, %d)\n" x y  
-             (wg, tg, Agrid.set owg ~x ~y 1, incX x, incY y x) 
-         | _ -> (wg, tg, owg, incX x, incY y x)) 
-       (wallsGrid, tilesGrid, openWallsGrid, 0, 0) 
-       grid 
+                 | 0 -> 
+         let () = Stdlib.Printf.printf "Open Wall (%d, %d)\n" x y in  
+           (wg, tg, Agrid.set owg ~x ~y 1, incX x, incY y x) 
+       | _ -> (wg, tg, owg, incX x, incY y x)
+ ) 
+     (wallsGrid, tilesGrid, openWallsGrid, 0, 0) grid) in 
+
+
+ (* let wallsGrid, tilesGrid, openWallsGrid, _, _ =  *)
+   (*   Agrid.fold  *)
+   (*     (fun (wg, tg, owg, x, y) i ->  *)
+   (*       match checkCell x y i with  *)
+   (*       | 2 ->  *)
+   (*           let () = Stdlib.Printf.printf "Wall (%d, %d)\n" x y   *)
+   (*           (Agrid.set wg ~x ~y 1, tg, owg, incX x, incY y x)  *)
+   (*       | 1 ->  *)
+   (*           let () = Stdlib.Printf.printf "Tile (%d, %d)\n" x y   *)
+   (*           (wg, Agrid.set tg ~x ~y 1, owg, incX x, incY y x)  *)
+   (*       | 0 ->  *)
+   (*           let () = Stdlib.Printf.printf "Open Wall (%d, %d)\n" x y   *)
+   (*           (wg, tg, Agrid.set owg ~x ~y 1, incX x, incY y x)  *)
+   (*       | _ -> (wg, tg, owg, incX x, incY y x))  *)
+   (*     (wallsGrid, tilesGrid, openWallsGrid, 0, 0)  *)
+   (*     grid  *)
 
 
    let emptyCol = Flex_array.make mHeight 0 in 
    let emptyRow = Flex_array.make mWidth 0 in 
-   let leftOpenWalls = Agrid.liat_col (Agrid.cons_col emptyCol openWallsGrid)  
-   let northOpenWalls = Agrid.liat_row (Agrid.cons_row emptyRow openWallsGrid)  
-   let rightOpenWalls = Agrid.tail_col (Agrid.snoc_col openWallsGrid emptyCol)  
-   let southOpenWalls = Agrid.tail_row (Agrid.snoc_row openWallsGrid emptyRow)  
-   let leftBit = Agrid.map (fun x -> x * 2) leftOpenWalls  
-   let rightBit = Agrid.map (fun x -> x * 8) rightOpenWalls  
-   let northBit = Agrid.map (fun x -> x * 4) northOpenWalls  
-   let southBit = Agrid.map (fun x -> x * 1) southOpenWalls  
-   let gridAry = Flex_array.of_list [ leftBit; rightBit; northBit; southBit ]  
-   let combined = VectorArith.GridMath.sumGridArray gridAry  
+   let leftOpenWalls = Agrid.liat_col (Agrid.cons_col emptyCol openWallsGrid) in 
+   let northOpenWalls = Agrid.liat_row (Agrid.cons_row emptyRow openWallsGrid) in  
+   let rightOpenWalls = Agrid.tail_col (Agrid.snoc_col openWallsGrid emptyCol) in  
+   let southOpenWalls = Agrid.tail_row (Agrid.snoc_row openWallsGrid emptyRow) in  
+   let leftBit = Agrid.map (fun x -> x * 2) leftOpenWalls   in 
+   let rightBit = Agrid.map (fun x -> x * 8) rightOpenWalls in 
+   let northBit = Agrid.map (fun x -> x * 4) northOpenWalls in 
+   let southBit = Agrid.map (fun x -> x * 1) southOpenWalls in 
+   let gridAry = Flex_array.of_list [ leftBit; rightBit; northBit; southBit ] in 
+   let combined = VectorArith.GridMath.sumGridArray gridAry in 
    let onlyTiles = 
-     VectorArith.GridMath.mathGrids VectorArith.FlexVector.mul combined tilesGrid 
+     VectorArith.GridMath.mathGrids VectorArith.FlexVector.mul combined tilesGrid in
 
-   let dirTest x y = x land y = y  
+   let dirTest x y = ((x land y) = y) 
+ in 
    let letters = 
      Agrid.map 
        (fun x -> 
@@ -181,9 +222,10 @@
          | x when dirTest x 2 -> "W" 
          | x when dirTest x 1 -> "S" 
          | _ -> "X") 
-     combined; 
+     combined
+ in
 
- let test_queue () = Queue.create ~capacity:10 
+ let test_queue () = Queue.create ~capacity:10 in 
 
  (* let () = Queue.enqueue test_queue step1 *) 
  (*   Queue.enqueue test_queue step2; *) 
@@ -198,43 +240,45 @@
  (*     Queue.enqueue test_queue step11 *) 
  (*  *) 
 
-
- let step1  = FunctionsNew.MazePrinter.print_mazeNew testmaze;  
+ let step1 ()  = FunctionsNew.MazePrinter.print_mazeNew testmaze in  
  let step2 () = DebugUtil.ppGrid wallsGrid Stdlib.Format.pp_print_int;  
    let step3 () = 
      Stdlib.print_endline "Walls"; 
- DebugUtil.ppGrid wallsGrid Stdlib.Format.pp_print_int; 
+ DebugUtil.ppGrid wallsGrid Stdlib.Format.pp_print_int in 
 
 
    let step4 () = 
      Stdlib.print_endline "Tiles"; 
- DebugUtil.ppGrid tilesGrid Stdlib.Format.pp_print_int; 
+ DebugUtil.ppGrid tilesGrid Stdlib.Format.pp_print_int in 
 
    let step5 () = 
      Stdlib.print_endline "Open Walls"; 
- DebugUtil.ppGrid openWallsGrid Stdlib.Format.pp_print_int; 
+ DebugUtil.ppGrid openWallsGrid Stdlib.Format.pp_print_int in 
 
    let step6 () = 
      Stdlib.print_endline "Left Open Walls - 2"; 
- DebugUtil.ppGrid leftOpenWalls Stdlib.Format.pp_print_int; 
+ DebugUtil.ppGrid leftOpenWalls Stdlib.Format.pp_print_int in 
 
    let step7 () = 
      Stdlib.print_endline "North Open Walls - 4"; 
- DebugUtil.ppGrid northOpenWalls Stdlib.Format.pp_print_int; 
+ DebugUtil.ppGrid northOpenWalls Stdlib.Format.pp_print_int in 
 
    let step8 () = 
      Stdlib.print_endline "Right Open Walls - 8"; 
- DebugUtil.ppGrid rightOpenWalls Stdlib.Format.pp_print_int; 
+ DebugUtil.ppGrid rightOpenWalls Stdlib.Format.pp_print_int in 
 
    let step9 () = 
      Stdlib.print_endline "South Open Walls - 1"; 
- DebugUtil.ppGrid southOpenWalls Stdlib.Format.pp_print_int; 
+ DebugUtil.ppGrid southOpenWalls Stdlib.Format.pp_print_int in 
 
    let step10 () = 
-     FunctionsNew.MazePrinter.print_mazeNew testmaze  
-     (* Stdlib.print_endline "Combined"; *) 
- DebugUtil.ppGrid combined Stdlib.Format.pp_print_int; 
-   (**) 
+ FunctionsNew.MazePrinter.print_mazeNew testmaze ; 
+     Stdlib.print_endline "Combined"; 
+ DebugUtil.ppGrid combined (Stdlib.Format.pp_print_int) in ()
+   
+
+
+ (* *) 
    (* let step11 = *) 
  (* Stdlib.print_endline "Letters"; *) 
      (* DebugUtil.ppGrid (letters : string Agrid.t) Stdlib.Format.pp_print_string; *) 
@@ -261,17 +305,5 @@
  (* DebugUtil.ppGrid newgrid Stdlib.Format.pp_print_int*) 
 
  (* letters,LAMBDA(_,IFS(BITAND(_,8)=8,"E",BITAND(_,4)=4,"N",BITAND(_,2)=2,"W",BITAND(_,1)=1,"S",TRUE,"")), *) 
-
- (* Stdlib.print_endline "Left Open Walls - 2"; *) 
- (* DebugUtil.ppGrid leftOpenWalls Stdlib.Format.pp_print_int; *) 
- (* Stdlib.print_endline "North Open Walls - 4"; *) 
- (* DebugUtil.ppGrid northOpenWalls Stdlib.Format.pp_print_int; *) 
- (* Stdlib.print_endline "Right Open Walls - 8"; *) 
- (* DebugUtil.ppGrid rightOpenWalls Stdlib.Format.pp_print_int; *) 
- (* Stdlib.print_endline "South Open Walls - 1"; *) 
- (* DebugUtil.ppGrid southOpenWalls Stdlib.Format.pp_print_int; *) 
- (* FunctionsNew.MazePrinter.print_mazeNew testmaze; *) 
- (* Stdlib.print_endline "Combined"; *) 
- (* DebugUtil.ppGrid combined Stdlib.Format.pp_print_int; *) 
- (* Stdlib.print_endline "Letters"; *) 
- (* DebugUtil.ppGrid letters Stdlib.Format.pp_print_string *) 
+     in
+     ();
