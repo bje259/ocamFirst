@@ -1,0 +1,7 @@
+(executable
+ (public_name conways)
+ (name main)
+ (libraries lib utop core agrid flex-array)
+ (modes byte exe)
+ (flags
+  (:standard -warn-error -A)))

@@ -1,0 +1,7 @@
+(library
+ (name lib)
+(modules debugUtil vectorArith types)
+ (libraries agrid flex-array base)
+ (flags
+  (:standard -warn-error -A)))
+ 
