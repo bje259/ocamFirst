@@ -1,6 +1,6 @@
 (lang dune 3.16)
 
-(name conways)
+(name bintreeprint)
 
 (generate_opam_files true)
 
@@ -16,10 +16,11 @@
 (documentation https://url/to/documentation)
 
 (package
- (name conways)
- (synopsis "Conway game of life")
- (description "Demo conway project")
- (depends ocaml dune core agrid flex-array utop containers ocamlutils notty notty_unix)
- )
+ (name bintreeprint)
+ (synopsis "A short synopsis")
+ (description "A longer description")
+ (depends ocaml dune core agrid flex-array)
+ (tags
+  (topics "to describe" your project)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

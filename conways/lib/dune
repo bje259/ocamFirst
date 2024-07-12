@@ -1,7 +1,6 @@
 (library
  (name lib)
-(modules debugUtil vectorArith types)
- (libraries agrid flex-array base)
+ (modules vectorArith types gamesetting ppConway nottyConway gamesetting2 conwaycore loop_event ntyConway)
+ (libraries agrid flex-array base core ocamlutils notty notty.unix)
  (flags
   (:standard -warn-error -A)))
- 

@@ -1,0 +1,8 @@
+(executable
+ (public_name bintreeprint)
+ (name main)
+ (libraries lib utop core agrid flex-array base)
+ (modes byte exe)
+ (flags
+  (:standard -warn-error -A)))
+
